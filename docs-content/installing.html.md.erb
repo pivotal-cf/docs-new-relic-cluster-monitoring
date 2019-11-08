@@ -1,34 +1,191 @@
 ---
-title: Installing and Configuring YOUR-PRODUCT-NAME
+title: Installing and Configuring New Relic Cluster Monitoring for Pivotal Platform
 owner: Partners
 ---
 
 <strong><%= modified_date %></strong>
 
-This topic describes how to install and configure YOUR-PRODUCT-NAME.
+This topic describes how to install and configure New Relic Cluster Monitoring for Pivotal Platform.
 
-##<a id='install'></a> Install and Configure YOUR-PRODUCT-NAME
+##<a id='req'></a> Installation Prerequisites
+You need basic knowledge of the following tools and technologies:
 
-To install the YOUR-PRODUCT-NAME file on the Ops Manager Installation Dashboard, do the following:
+* <a href="https://docs.docker.com/" target="_blank">Docker / Docker CLI</a>
+* Access from your kubernetes cluster to a docker registry (public or private)
+* <a href="https://helm.sh/" target="_blank">Helm Chart / helm CLI</a>
+* <a href="https://kubernetes.io/docs/tasks/tools/install-kubectl/" target="_blank">Kubernetes / kubectl CLI</a>
+* PKS CLI <a href="https://docs.pivotal.io/runtimes/pks/1-3/installing-pks-cli.html" target="_blank">Installation</a> & <a href="https://docs.pivotal.io/runtimes/pks/1-3/cli/index.html" target="_blank">Usage</a>
 
-1. Download the product file from Pivotal Network.
 
-1. Navigate to the Ops Manager Installation Dashboard and click **Import a Product** to upload the product file.
 
-1. Under **Import a Product**, click **+** next to the version number of YOUR-PRODUCT-NAME.
-This adds the tile to your staging area.
 
-1. Click the newly added **YOUR-PRODUCT-NAME** tile.
+##<a id='install'></a> Installation and Configuration of New Relic Cluster Monitoring for Pivotal Platform
 
-1. **This portion of the procedure should tell the users how to configure the newly added tile by
-walking them through the sections. Which fields should they fill out? What are the different
-checkboxes? Include relevant screenshots here.**
+Please perform the instructions in this section to install New Relic Cluster Monitoring for Pivotal Platform.
 
-1. Click **Save**.
 
-1. Return to the Ops Manager Installation Dashboard and click **Apply changes** to install YOUR-PRODUCT-NAME tile.
+* Obtain your New Relic account's license key
+	* Login to New Relic account intended for use with NRI kubernetes Cluster Monitoring
+	* On the top right click on the pull-down menu and select "Account Settings"
+	* You will find the license key on the right side towards the middle of the page
 
-**If needed, include additional configuration information below. For example, maybe there are
-configuration options not required for installation but which could be useful for certain users. Typical topics include:**
-1. **Self-service**--Do you have recommendations on how to configure/design plans in the tile so that users can choose the best options for themselves?
-1. **High availability**--How do you configure/deploy X Service tile to be highly available?
+<br/>
+<center>
+    <img src="images/nr-license-key.png" alt="License Key in New Relic UI" height="600" width="800"/>
+</center>
+
+
+* Obtain the current Kubernetes cluster name using kubectl CLI command
+
+	```bash
+	kubectl config current-context
+	```
+
+	* If the current cluster is not the correct target cluster, perform the following:
+
+		* Get a list of available clusters
+
+			```bash
+			kubectl config get-clusters
+			```
+
+		* Set the current context to the desired cluster from the list returned by the previous command
+
+		```bash
+		kubectl config use-context <DESIRED_CLUSTER>
+		```
+
+* Download New Relic Cluster Monitoring for Pivotal Platform (new-relic-cluster-monitoring-x.x.x.tgz) from <a href="https://network.pivotal.io/products/new-relic-cluster-monitoring" target="_blank">PivNet</a>
+<br/>Where "x.x.x" is the version of New Relic Cluster Monitoring for Pivotal Platform package downloaded from PivNet, and is also the same as the New Relic Infrastructure helm chart version.
+
+* extract the downloaded package. This will create a subdirectory by the name **"new-relic-cluster-monitoring-x.x.x"**
+
+	```bash
+	tar xzf new-relic-cluster-monitoring-x.x.x.tgz
+	```
+
+* Change directory to **"new-relic-cluster-monitoring-x.x.x"**
+
+	```bash
+	cd new-relic-cluster-monitoring-x.x.x
+	```
+
+* The installation folder includes a **yaml** file called **nr-install-params.yaml**. Open this file in text editor of your choice and assign proper values to the following properties:
+
+	```
+	licenseKey                             # New Relic account's license key
+	cluster                                # kubernetes cluster name
+	config.custom_attributes.platform      # platform name (i.e. pks)
+	config.custom_attributes.cluster       # kubernetes cluster name
+	```
+
+
+
+* <strong>Perform the instructions in this section of the installation only if your cluster does not have access to public docker registriy (i.e. docker hub) and utilizes private registries</strong>
+
+	<br/>
+	<strong>Note: If your kubernetes cluster has access to docker hub you can skip this step</strong> [and continue here](#helm)
+
+	* If your network does not have access to public docker registry and you are using your internal/private registry for docker images, please follow the instructions in this step to tag and push New Relic Infrastructure image for kubernetes to your private docker registry. For your convenience a docker image of New Relic Infrastructure agent is included in New Relic Cluster Monitoring for Pivotal Platform. 
+
+	* Run the following docker command to load the image to your local docker images
+
+		```bash
+		docker load newrelic-infrastructure-k8s-image-x.x.x.tgz newrelic/infrastructure-k8s
+		```
+		Where "x.x.x" is the version of New Relic Infrastructure image for kubernetes that's provided in PivNet package
+		<br/>
+
+
+	* Tag the image with your private docker registry address
+
+		```bash
+		docker tag newrelic/infrastructure-k8s:x.x.x <__PRIVATE_DOCKER_REGISTRY_ADDRESS__>/<__FULL_PATH_TO__>/newrelic/infrastructure-k8s:x.x.x
+		```
+		<br/>
+
+
+	* Run the following command to push New Relic Infrastructure docker image to your private registry
+
+		```bash
+		docker push <__PRIVATE_DOCKER_REIGSTRY_ADDRESS__>/<__FULL_PATH_TO__>/newrelic/infrastructure-k8s:x.x.x
+		```
+
+	* Edit **nr-install-params.yaml**, uncomment and update **image.repository** with correct value of New Relic Infrastructure full image name.
+
+		```bash
+		image:
+		  repository: __REGISTRY_PATH_/_NEWRELIC_INFRASTRUCTURE_K8S_IMAGE_NAME__
+		```
+
+	* If your private registry requires credentials, uncomment the **imageCredentials** section in **nr-install-params.yaml** and provide values for **secret name**, **registry**, **username**, and **password**.
+
+<br/>
+<br/>
+
+
+* <a id="helm"></a>Make sure you have installed <a href="https://github.com/helm/helm#install" target="_blank">Helm</a> on your machine. You could also download the latest release from <a href="https://github.com/helm/helm/releases" target="_blank">helm github releases</a>. 
+
+<br/>
+
+* A serviceaccount will be used for tiller (helm's service which runs inside the k8s cluster) for role-based access control purposes (RBAC). If you have an existing serviceaccount which you wish to use, uncomment and specify **serviceAccount.name** in **nr-install-params.yaml** by replacing `"__MY_SERVICEACCOUNT_NAME__"` with your serviceaccount name. Otherwise, a serviceaccount name will be generated using the fullname template.
+
+	```bash
+	serviceAccount:
+	  name: __MY_SERVICEACCOUNT_NAME__
+	  ```
+
+
+<br/>
+
+* Save the installation parameters yaml file as it will be used in the following steps to install helm chart.
+
+<br/>
+
+* If this is the first time you are using Helm on this cluster, initialize it so that 'tiller' is installed on the cluster
+
+	```bash
+	helm init
+	```
+
+* Run the following helm install command with `"--dry-run"` and `"--debug"` switches to make sure everything is configured properly in the chart. Note that `"--dry-run"` switch causes the command not to install the bits, but test the command with its arguments :
+
+	```bash
+	helm install --dry-run --debug newrelic-infrastructure-x.x.x.tgz -f nr-install-params.yaml
+	```
+
+* Once you ensure everything is configured properly, run the following command to install New Relic Cluster Monitoring for kube-state-metrics. Note that in this command "--dry-run" and "--debug" switches are removed.
+
+	```bash
+	helm install newrelic-infrastructure-x.x.x.tgz -f nr-install-params.yaml
+	```
+
+* Wait for several seconds. Then run the following command to ensure that the daemonset and pods for NRI Daemonset have been created
+
+	```bash
+	kubectl get daemonsets,pods
+	```
+	You should see a daemonset, and one pod per worker node
+
+
+
+##<a id='upgrade'></a> Upgrade New Relic Infrastructure Integration for PKS
+
+To upgrade NRI kubernetes integration follow the instructions below
+
+
+* Obtain the new release of helm chart for NRI kubernetes integration from <a href="https://network.pivotal.io/products/new-relic-cluster-monitoring" target="_blank">PivNet</a>
+* Edit **"nr-install-params.yaml"** and make sure it has all correct values
+* Run the helm upgrade command to upgrade to the new chart
+
+	```bash
+	helm upgrade $(helm list | grep "newrelic-infrastructure-\d*\.\d*\.\d*" | awk '{print $1}') newrelic-infrastructure-x.x.x.tgz -f nr-install-params.yaml
+	```
+
+
+
+##<a id='cluster-update'></a> Cluster Update and Modification
+
+When the configuration of the cluster is modified (i.e. increasing number of cluster worker nodes) the daemonset is adjusted as necessary, and NRI pods are created on newly created nodes. There is no need for the operator to make any manual modifications to the NRI daemonset.
+
+
