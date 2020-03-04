@@ -1,11 +1,11 @@
 ---
-title: Installing and Configuring New Relic Cluster Monitoring for Pivotal Platform
+title: Installing and Configuring New Relic Cluster Monitoring for VMware Tanzu
 owner: Partners
 ---
 
 <strong><%= modified_date %></strong>
 
-This topic describes how to install and configure New Relic Cluster Monitoring for Pivotal Platform.
+This topic describes how to install and configure New Relic Cluster Monitoring for VMware Tanzu.
 
 ##<a id='req'></a> Installation Prerequisites
 You need basic knowledge of the following tools and technologies:
@@ -14,14 +14,14 @@ You need basic knowledge of the following tools and technologies:
 * Access from your kubernetes cluster to a docker registry (public or private)
 * <a href="https://helm.sh/" target="_blank">Helm chart / helm CLI</a>
 * <a href="https://kubernetes.io/docs/tasks/tools/install-kubectl/" target="_blank">Kubernetes / kubectl CLI</a>
-* PKS CLI <a href="https://docs.pivotal.io/runtimes/pks/1-3/installing-pks-cli.html" target="_blank">Installation</a> & <a href="https://docs.pivotal.io/runtimes/pks/1-3/cli/index.html" target="_blank">Usage</a>
+* VMware PKS CLI <a href="https://docs.pivotal.io/runtimes/pks/1-3/installing-pks-cli.html" target="_blank">Installation</a> & <a href="https://docs.pivotal.io/runtimes/pks/1-3/cli/index.html" target="_blank">Usage</a>
 
 
 
 
-##<a id='install'></a> Installation and Configuration of New Relic Cluster Monitoring for Pivotal Platform
+##<a id='install'></a> Installation and Configuration of New Relic Cluster Monitoring for VMware Tanzu
 
-Perform the instructions in this section to install New Relic Cluster Monitoring for Pivotal Platform.
+Perform the instructions in this section to install New Relic Cluster Monitoring for VMware Tanzu.
 
 
 * Obtain your New Relic account license key
@@ -55,7 +55,7 @@ Perform the instructions in this section to install New Relic Cluster Monitoring
 		kubectl config use-context <DESIRED_CLUSTER>
 		```
 
-* Download New Relic Cluster Monitoring for Pivotal Platform (new-relic-cluster-monitoring-x.x.x.tgz) from <a href="https://network.pivotal.io/products/new-relic-cluster-monitoring" target="_blank">Pivotal Network.</a> Ensure "x.x.x", the version of New Relic Cluster Monitoring for Pivotal Platform package downloaded from Pivotal Network, is also the same as the New Relic Infrastructure Helm chart version.
+* Download New Relic Cluster Monitoring for VMware Tanzu (new-relic-cluster-monitoring-x.x.x.tgz) from <a href="https://network.pivotal.io/products/new-relic-cluster-monitoring" target="_blank">Pivotal Network.</a> Ensure "x.x.x", the version of New Relic Cluster Monitoring for VMware Tanzu package downloaded from Pivotal Network, is also the same as the New Relic Infrastructure Helm chart version.
 
 * extract the downloaded package. This creates a subdirectory by the name **"new-relic-cluster-monitoring-x.x.x"**
 
@@ -85,7 +85,7 @@ Perform the instructions in this section to install New Relic Cluster Monitoring
 	<br/>
 	<strong>Note: If your kubernetes cluster has access to docker hub you can skip this step</strong> [and continue here](#helm)
 
-	* If your network does not have access to public docker registry and you are using your internal/private registry for docker images, please follow the instructions in this step to tag and push New Relic Infrastructure image for kubernetes to your private docker registry. For your convenience a docker image of New Relic Infrastructure agent is included in New Relic Cluster Monitoring for Pivotal Platform.
+	* If your network does not have access to public docker registry and you are using your internal/private registry for docker images, please follow the instructions in this step to tag and push New Relic Infrastructure image for kubernetes to your private docker registry. For your convenience a docker image of New Relic Infrastructure agent is included in New Relic Cluster Monitoring for VMware Tanzu.
 
 	* Run the following docker command to load the image to your local docker images
 
@@ -168,7 +168,7 @@ Perform the instructions in this section to install New Relic Cluster Monitoring
 
 
 
-##<a id='upgrade'></a> Upgrade New Relic Infrastructure Integration for PKS
+##<a id='upgrade'></a> Upgrade New Relic Infrastructure Integration for VMware PKS
 
 To upgrade NRI kubernetes integration follow the instructions below
 
